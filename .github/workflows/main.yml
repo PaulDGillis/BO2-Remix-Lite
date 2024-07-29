@@ -1,4 +1,4 @@
-name: Compile Mod
+name: CompileAndDeploy Mod
 on:
   push:
     branches: [ main ]
@@ -8,22 +8,26 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
-
+      - name: Setup GSC Tool
+        uses: xensik/setup-gsc-tool@v1
+        with:
+          version: '1.4.6'
       - name: Compile Mod
         shell: cmd
-        # Arguments:
-          # onefile = Compile all the GSC inside of src\gsc into one GSC file (doesn't support folders)
-          # multifile = Compile files separately (supports folders)
-          # release.gsc/.zip = File Name to have under your GitHub Release.
-              # Note that if you change this, you should change the very last line in this file to match.
-        # By Default, we compile everything on it's own and ZIP it. If you want to change this, simply replace "multifile release.zip" with "onefile release.gsc"
-        run: cd tools && call compile.bat multifile BO2-Remix.zip
-
-      - uses: "marvinpinto/action-automatic-releases@latest"
+        run: gsc-tool.exe -m comp -g t6 -s pc ./src
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          path: "./compiled/t6/scripts/zm/."
+          filename: 'BO2-Remix-Lite.zip'
+      - name: Upload Release
+        uses: dciborow/action-github-releases@v1.0.1
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
           prerelease: false
-          title: "BO2-Remix"
+          title: "Release Build"
           files: |
-            tools/BO2-Remix.zip
+            BO2-Remix-Lite.zip
+            BO2-Remix-Lite-Installer.bat

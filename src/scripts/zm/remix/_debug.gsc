@@ -1,22 +1,21 @@
-#include maps/mp/gametypes_zm/_hud_util;
-#include maps/mp/zombies/_zm_utility;
-#include common_scripts/utility;
-#include maps/mp/_utility;
-#include maps/mp/zombies/_zm_powerups;
-#include maps/mp/zombies/_zm_weapons;
-#include maps/mp/zombies/_zm_magicbox;
-#include maps/mp/zombies/_zm;
-#include maps/mp/zombies/_zm_unitrigger;
-#include maps/mp/zombies/_zm_blockers;
-#include maps/mp/zombies/_zm_pers_upgrades_system;
-#include maps/mp/zombies/_zm_perks;
-#include maps/mp/zombies/_zm_stats;
-#include maps/mp/zombies/_zm_pers_upgrades_functions;
-#include maps/mp/zombies/_zm_unitrigger;
-#include maps/mp/zombies/_zm_weap_claymore;
-#include maps/mp/zombies/_zm_melee_weapon;
-#include maps/mp/zombies/_zm_craftables;
-#include maps/mp/zombies/_zm_equipment;
+#include maps\mp\gametypes_zm\_hud_util;
+#include maps\mp\zombies\_zm_utility;
+#include common_scripts\utility;
+#include maps\mp\_utility;
+#include maps\mp\zombies\_zm_powerups;
+#include maps\mp\zombies\_zm_weapons;
+#include maps\mp\zombies\_zm_magicbox;
+#include maps\mp\zombies\_zm;
+#include maps\mp\zombies\_zm_unitrigger;
+#include maps\mp\zombies\_zm_blockers;
+#include maps\mp\zombies\_zm_pers_upgrades_system;
+#include maps\mp\zombies\_zm_perks;
+#include maps\mp\zombies\_zm_stats;
+#include maps\mp\zombies\_zm_pers_upgrades_functions;
+#include maps\mp\zombies\_zm_weap_claymore;
+#include maps\mp\zombies\_zm_melee_weapon;
+#include maps\mp\zombies\_zm_craftables;
+#include maps\mp\zombies\_zm_equipment;
 
 debug( debug )
 {
@@ -176,7 +175,7 @@ give_tomahwak()
 		self disable_player_move_states( 1 );
 		gun = self getcurrentweapon();
 		self notify( "player_obtained_tomahawk" );
-		self maps/mp/zombies/_zm_stats::increment_client_stat( "prison_tomahawk_acquired", 0 );
+		self maps\mp\zombies\_zm_stats::increment_client_stat( "prison_tomahawk_acquired", 0 );
 		self giveweapon( "zombie_tomahawk_flourish" );
 		//self thread tomahawk_update_hud_on_last_stand();
 		self switchtoweapon( "zombie_tomahawk_flourish" );
@@ -325,7 +324,7 @@ turnOnPower() //by xepixtvx
 	trig notify( "trigger", self );
 	trig setInvisibleToAll();
 	powerSwitch rotateRoll( -90, 0, 3 );
-	level thread maps/mp/zombies/_zm_perks::perk_unpause_all_perks();
+	level thread maps\mp\zombies\_zm_perks::perk_unpause_all_perks();
 	powerSwitch waittill( "rotatedone" );
 	flag_set( "power_on" );
 	level setClientField( "zombie_power_on", 1 ); 
@@ -337,14 +336,14 @@ give_sallys()
 	if(level.script != "zm_tomb")
 	{
 		self TakeWeapon( "m1911_zm" );
-		self GiveWeapon( "m1911_upgraded_zm", 0, self maps/mp/zombies/_zm_weapons::get_pack_a_punch_weapon_options( "m1911_upgraded_zm" ) );
+		self GiveWeapon( "m1911_upgraded_zm", 0, self maps\mp\zombies\_zm_weapons::get_pack_a_punch_weapon_options( "m1911_upgraded_zm" ) );
 		self GiveStartAmmo( "m1911_upgraded_zm" );
 		self SwitchToWeapon( "m1911_upgraded_zm" );
 	}
 	else
 	{
 		self TakeWeapon( "c96_zm" );
-		self GiveWeapon( "c96_upgraded_zm", 0, self maps/mp/zombies/_zm_weapons::get_pack_a_punch_weapon_options( "c96_upgraded_zm" ) );
+		self GiveWeapon( "c96_upgraded_zm", 0, self maps\mp\zombies\_zm_weapons::get_pack_a_punch_weapon_options( "c96_upgraded_zm" ) );
 		self GiveStartAmmo( "c96_upgraded_zm" );
 		self SwitchToWeapon( "c96_upgraded_zm" );
 	}

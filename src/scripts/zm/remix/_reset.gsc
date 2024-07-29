@@ -1,6 +1,6 @@
-#include maps/mp/gametypes_zm/_hud_util;
-#include maps/mp/zombies/_zm_utility;
-#include common_scripts/utility;
+#include maps\mp\gametypes_zm\_hud_util;
+#include maps\mp\zombies\_zm_utility;
+#include common_scripts\utility;
 
 fake_reset()
 {
@@ -43,99 +43,61 @@ coop_pause()
 	level endon("disconnect");
 	level endon("end_game");
 
-	setDvar( "coop_pause", 0 );
-
-	paused_time = 0;
-	paused_start_time = 0;
-	paused = false;
-
-	start_time = int(getTime() / 1000);
+	flag_wait( "initial_blackscreen_passed" );
 
 	players = get_players();
+	while (players.size > 0) {
+		level waittill("say", message, player);
 
-	while(players.size > 1)
-	{
-		if( getDvarInt( "coop_pause" ) == 1 )
-		{	
-			if(get_round_enemy_array().size + level.zombie_total != 0 || flag( "dog_round" ) || flag( "leaper_round" ))
-			{
-				iprintln("All players will be paused at the start of the next round");
-				level waittill( "end_of_round" );
-			}
+    	if (message == "p")
+    	{
+			player freezeControls(true);
+			player EnableInvulnerability();
+			player.ignoreme = true;
+			player.paused = true;
 
-			players[0] SetClientDvar( "ai_disableSpawn", "1" );
+			// Create UI
+			player.black_hud = NewClientHudElem(player);
+			player.black_hud.horzAlign = "fullscreen";
+			player.black_hud.vertAlign = "fullscreen";
+			player.black_hud SetShader( "black", 640, 480 );
+			player.black_hud.alpha = 0;
 
-			level waittill( "start_of_round" );
+			player.black_hud FadeOverTime( 1.0 );
+			player.black_hud.alpha = 0.7;
+			player.black_hud.hidewheninmenu = 1;
 
-			black_hud = newhudelem();
-			black_hud.horzAlign = "fullscreen";
-			black_hud.vertAlign = "fullscreen";
-			black_hud SetShader( "black", 640, 480 );
-			black_hud.alpha = 0;
+			player.paused_hud = NewClientHudElem(player);
+			player.paused_hud.horzAlign = "center";
+			player.paused_hud.vertAlign = "middle";
+			player.paused_hud setText("GAME PAUSED");
+			player.paused_hud.foreground = true;
+			player.paused_hud.fontScale = 2.3;
+			player.paused_hud.x -= 63;
+			player.paused_hud.y -= 20;
+			player.paused_hud.alpha = 0;
+			player.paused_hud.color = ( 1.0, 1.0, 1.0 );
+			player.paused_hud.hidewheninmenu = 1;
 
-			black_hud FadeOverTime( 1.0 );
-			black_hud.alpha = 0.7;
+			player.paused_hud FadeOverTime( 1.0 );
+			player.paused_hud.alpha = 0.85;
+   		} 
+		else if (message == "u") 
+		{
+			player freezeControls(false);
+			player DisableInvulnerability();
+			player.ignoreme = false;
+			player.paused = false;
 
-			paused_hud = newhudelem();
-			paused_hud.horzAlign = "center";
-			paused_hud.vertAlign = "middle";
-			paused_hud setText("GAME PAUSED");
-			paused_hud.foreground = true;
-			paused_hud.fontScale = 2.3;
-			paused_hud.x -= 63;
-			paused_hud.y -= 20;
-			paused_hud.alpha = 0;
-			paused_hud.color = ( 1.0, 1.0, 1.0 );
-
-			paused_hud FadeOverTime( 1.0 );
-			paused_hud.alpha = 0.85;
-			
-			players = get_players();
-			for(i = 0; players.size > i; i++)
-			{
-				players[i] freezecontrols(true);
-			}
-
-			paused = true;
-			paused_start_time = int(getTime() / 1000);
-			total_time = 0 - (paused_start_time - level.paused_time) - (start_time - 0.05);
-			previous_paused_time = level.paused_time;
-
-			while(paused)
-			{	
-				players = get_players();
-				for(i = 0; players.size > i; i++)
-				{
-					players[i].timer_hud SetTimerUp(total_time);
-				}
-				
-				wait 0.2;
-
-				current_time = int(getTime() / 1000);
-				current_paused_time = current_time - paused_start_time;
-				level.paused_time = previous_paused_time + current_paused_time;
-
-				if( getDvarInt( "coop_pause" ) == 0 )
-				{
-					paused = false;
-
-					for(i = 0; players.size > i; i++)
-					{
-						players[i] freezecontrols(false);
-					}
-
-					players[0] SetClientDvar( "ai_disableSpawn", "0");
-
-					paused_hud FadeOverTime( 0.5 );
-					paused_hud.alpha = 0;
-					black_hud FadeOverTime( 0.5 );
-					black_hud.alpha = 0;
-					wait 0.5;
-					black_hud destroy();
-					paused_hud destroy();
-				}
-			}
+			// Destroy UI
+			player.paused_hud FadeOverTime( 0.5 );
+			player.paused_hud.alpha = 0;
+			player.black_hud FadeOverTime( 0.5 );
+			player.black_hud.alpha = 0;
+			wait 0.5;
+			player.black_hud destroy();
+			player.paused_hud destroy();
 		}
-		wait 0.05;
+   		wait 0.05; 
 	}
 }

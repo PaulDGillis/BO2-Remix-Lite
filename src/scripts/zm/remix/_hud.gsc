@@ -1,9 +1,9 @@
-#include maps/mp/gametypes_zm/_hud_util;
-#include maps/mp/zombies/_zm_utility;
-#include common_scripts/utility;
+#include maps\mp\gametypes_zm\_hud_util;
+#include maps\mp\zombies\_zm_utility;
+#include common_scripts\utility;
 #include maps\mp\_utility;
 
-#include scripts/zm/remix/_utility;
+#include scripts\zm\remix\_utility;
 
 all_hud_watcher()
 {	
@@ -33,7 +33,7 @@ all_hud_watcher()
 		}
 		self setClientDvar( "hud_round_timer", 0 );
 		self setClientDvar( "hud_remaining", 0 );
-		self setClientDvar( "hud_zones", 0 );
+		self setClientDvar( "hud_zone", 0 );
 		self setClientDvar( "hud_health_bar", 0 );
 		self setClientDvar( "hud_trap_timer", 0 );
 	}
@@ -52,203 +52,6 @@ set_hud_offset()
 	self.zone_hud_offset = 15;
 }
 
-timer_hud()
-{	
-	if( isDefined( level.strat_tester ) && level.strat_tester ) 
-		return;
-	self endon("disconnect");
-
-	create_dvar( "hud_timer", 1 );
-
-	self.timer_hud = newClientHudElem(self);
-	self.timer_hud.alignx = "left";
-	self.timer_hud.aligny = "top";
-	self.timer_hud.horzalign = "user_left";
-	self.timer_hud.vertalign = "user_top";
-	self.timer_hud.x += 4;
-	self.timer_hud.y += 2;
-	self.timer_hud.fontscale = 1.4;
-	self.timer_hud.alpha = 0;
-	self.timer_hud.color = ( 1, 1, 1 );
-	self.timer_hud.hidewheninmenu = 1;
-
-	self set_hud_offset();
-	self thread timer_hud_watcher();
-	self thread round_timer_hud();
-
-	flag_wait( "initial_blackscreen_passed" );
-	self.timer_hud setTimerUp(0);
-
-	// self thread tab_hud();
-	// self thread waittill_player_pressed_scoreboard();
-
-	level waittill( "end_game" );
-
-	level.total_time -= .1; // need to set it below the number or it shows the next number
-	while(1)
-	{	
-		self.timer_hud setTimer(level.total_time);
-		self.timer_hud.alpha = 1;
-		self.round_timer_hud.alpha = 0;
-		wait 0.1;
-	}
-}
-
-timer_hud_watcher()
-{	
-	self endon("disconnect");
-	level endon( "end_game" );
-
-	while(1)
-	{	
-		while( getDvarInt( "hud_timer" ) == 0 )
-		{
-			wait 0.1;
-		}
-		self.timer_hud.y = (2 + self.timer_hud_offset);
-		self.timer_hud.alpha = 1;
-
-		while( getDvarInt( "hud_timer" ) >= 1 )
-		{
-			wait 0.1;
-		}
-		self.timer_hud.alpha = 0;
-	}
-}
-
-round_timer_hud()
-{
-	if( isDefined( level.strat_tester ) && level.strat_tester )
-		return;
-
-	self endon("disconnect");
-
-	create_dvar( "hud_round_timer", 1 );
-
-	self.round_timer_hud = newClientHudElem(self);
-	self.round_timer_hud.alignx = "left";
-	self.round_timer_hud.aligny = "top";
-	self.round_timer_hud.horzalign = "user_left";
-	self.round_timer_hud.vertalign = "user_top";
-	self.round_timer_hud.x += 4;
-	self.round_timer_hud.y += (2 + (15 * getDvarInt("hud_timer") ) + self.timer_hud_offset );
-	self.round_timer_hud.fontscale = 1.4;
-	self.round_timer_hud.alpha = 0;
-	self.round_timer_hud.color = ( 1, 1, 1 );
-	self.round_timer_hud.hidewheninmenu = 1;
-
-	flag_wait( "initial_blackscreen_passed" );
-
-	self thread round_timer_hud_watcher();
-
-	level.FADE_TIME = 0.2;
-
-	while (1)
-	{
-		zombies_this_round = level.zombie_total + get_round_enemy_array().size;
-		hordes = zombies_this_round / 24;
-		dog_round = flag( "dog_round" );
-		leaper_round = flag( "leaper_round" );
-
-		self.round_timer_hud setTimerUp(0);
-		start_time = int(getTime() / 1000);
-
-		level waittill( "end_of_round" );
-
-		end_time = int(getTime() / 1000);
-		time = end_time - start_time;
-
-		self display_round_time(time, hordes, dog_round, leaper_round);
-
-		level waittill( "start_of_round" );
-
-		if( getDvarInt( "hud_round_timer" ) >= 1 )
-		{
-			self.round_timer_hud FadeOverTime(level.FADE_TIME);
-			self.round_timer_hud.alpha = 1;
-		}
-	}
-}
-
-display_round_time(time, hordes, dog_round, leaper_round)
-{
-	timer_for_hud = time - 0.1;
-
-	sph_off = 1;
-	if(level.round_number > 50 && !dog_round && !leaper_round)
-	{
-		sph_off = 0;
-	}
-
-	self.round_timer_hud FadeOverTime(level.FADE_TIME);
-	self.round_timer_hud.alpha = 0;
-	wait level.FADE_TIME * 2;
-
-	self.round_timer_hud.label = &"Round Time: ";
-	self.round_timer_hud FadeOverTime(level.FADE_TIME);
-	self.round_timer_hud.alpha = 1;
-
-	for ( i = 0; i < 100 + (100 * sph_off); i++ ) // wait 10s or 5s
-	{
-		self.round_timer_hud setTimer(timer_for_hud);
-		wait 0.05;
-	}
-
-	self.round_timer_hud FadeOverTime(level.FADE_TIME);
-	self.round_timer_hud.alpha = 0;
-	wait level.FADE_TIME * 2;
-
-	if(sph_off == 0)
-	{
-		self display_sph(time, hordes);
-	}
-
-	self.round_timer_hud.label = &"";
-}
-
-display_sph( time, hordes )
-{
-	sph = time / hordes;
-
-	self.round_timer_hud FadeOverTime(level.FADE_TIME);
-	self.round_timer_hud.alpha = 1;
-	self.round_timer_hud.label = &"SPH: ";
-	self.round_timer_hud setValue(sph);
-
-	for ( i = 0; i < 5; i++ )
-	{
-		wait 1;
-	}
-
-	self.round_timer_hud FadeOverTime(level.FADE_TIME);
-	self.round_timer_hud.alpha = 0;
-
-	wait level.FADE_TIME;
-}
-
-round_timer_hud_watcher()
-{	
-	self endon("disconnect");
-	level endon( "end_game" );
-
-	while(1)
-	{
-		while( getDvarInt( "hud_round_timer" ) == 0 )
-		{
-			wait 0.1;
-		}
-		self.round_timer_hud.y = (2 + (15 * getDvarInt("hud_timer") ) + self.timer_hud_offset );
-		self.round_timer_hud.alpha = 1;
-
-		while( getDvarInt( "hud_round_timer" ) >= 1 )
-		{
-			wait 0.1;
-		}
-		self.round_timer_hud.alpha = 0;
-
-	}
-}
-
 zombie_remaining_hud()
 {
 	if( isDefined( level.strat_tester ) && level.strat_tester )
@@ -259,15 +62,15 @@ zombie_remaining_hud()
 
 	level waittill( "start_of_round" );
 
-    self.zombie_counter_hud = maps/mp/gametypes_zm/_hud_util::createFontString( "hudsmall" , 1.4 );
-    self.zombie_counter_hud maps/mp/gametypes_zm/_hud_util::setPoint( "CENTER", "CENTER", "CENTER", 190 );
+    self.zombie_counter_hud = maps\mp\gametypes_zm\_hud_util::createFontString( "hudsmall" , 1.4 );
+    self.zombie_counter_hud maps\mp\gametypes_zm\_hud_util::setPoint( "CENTER", "CENTER", "CENTER", 190 );
     self.zombie_counter_hud.alpha = 0;
-    self.zombie_counter_hud.label = &"Zombies: ^1";
+    self.zombie_counter_hud.label = &"^1";
 	self thread zombie_remaining_hud_watcher();
 
     while( 1 )
     {
-        self.zombie_counter_hud setValue( ( maps/mp/zombies/_zm_utility::get_round_enemy_array().size + level.zombie_total ) );
+        self.zombie_counter_hud setValue( ( maps\mp\zombies\_zm_utility::get_round_enemy_array().size + level.zombie_total ) );
         
         wait 0.05; 
     }
@@ -281,7 +84,7 @@ zombie_remaining_hud_watcher()
 	self endon("disconnect");
 	level endon( "end_game" );
 
-	create_dvar( "hud_remaining", 1 );
+	create_dvar( "hud_remaining", 0 );
 
 	while(1)
 	{
@@ -296,66 +99,6 @@ zombie_remaining_hud_watcher()
 			wait 0.1;
 		}
 		self.zombie_counter_hud.alpha = 0;
-	}
-}
-
-health_bar_hud()
-{
-	if( isDefined( level.strat_tester ) && level.strat_tester )
-		return;
-
-	self endon("disconnect");
-
-	create_dvar( "hud_health_bar", 1 );
-
-	flag_wait( "initial_blackscreen_passed" );
-
-	x = 62;
-	y = 135;
-	if (level.script == "zm_buried")
-	{
-		y -= 26;
-	}
-	else if (level.script == "zm_tomb")
-	{
-		y -= 60;
-	}
-
-	self.health_bar = self createbar((1, 1, 1), level.primaryprogressbarwidth - 9, level.primaryprogressbarheight - 1);
-	self.health_bar setpoint_custom(undefined, "LEFT", x, y);
-	self.health_bar.hidewheninmenu = 1;
-	self.health_bar.bar.hidewheninmenu = 1;
-	self.health_bar.barframe.hidewheninmenu = 1;
-
-	self.health_bar_text = createfontstring("objective", 1.1);
-	self.health_bar_text setpoint_custom(undefined, "LEFT", x + 67, y - 0.5);
-	self.health_bar_text.hidewheninmenu = 1;
-
-	while( 1 )
-	{
-		if( getDvarInt( "hud_health_bar" ) == 0)
-		{	
-			self.health_bar hideelem();
-			self.health_bar_text hideelem();
-		}
-		else
-		{
-			if( isDefined(self.e_afterlife_corpse) || isDefined( self.waiting_to_revive ) && self.waiting_to_revive == 1 || self maps/mp/zombies/_zm_laststand::player_is_in_laststand() )
-			{
-				self.health_bar hideelem();
-				self.health_bar_text hideelem();
-			}
-			else
-			{
-				self.health_bar showelem();
-				self.health_bar_text showelem();
-			}
-
-			self.health_bar updatebar(self.health / self.maxhealth);
-			self.health_bar_text setvalue(self.health);
-		}
-
-		wait 0.05;
 	}
 }
 
@@ -423,14 +166,15 @@ zone_hud()
 
 	self.zone_hud = newClientHudElem(self);
 	self.zone_hud.alignx = "left";
-	self.zone_hud.aligny = "bottom";
+	self.zone_hud.aligny = "top";
 	self.zone_hud.horzalign = "user_left";
-	self.zone_hud.vertalign = "user_bottom";
-	self.zone_hud.x += x;
-	self.zone_hud.y += y;
+	self.zone_hud.vertalign = "user_top";
+	self.zone_hud.x += 4;
+	self.zone_hud.y = (2 + self.timer_hud_offset);
+	// self.zone_hud.y += (2 + (15 * getDvarInt("hud_timer") ) + self.timer_hud_offset );
 	self.zone_hud.fontscale = 1.3;
 	self.zone_hud.alpha = 0;
-	self.zone_hud.color = ( 1, 1, 1 );
+	self.zone_hud.color = ( 0.4, 0.4, 0.4 );
 	self.zone_hud.hidewheninmenu = 1;
 
 	flag_wait( "initial_blackscreen_passed" );
@@ -1490,9 +1234,9 @@ color_hud_watcher()
 {
 	self endon("disconnect");
 
-	create_dvar( "hud_color", "1 1 1" );
+	create_dvar( "hud_color", "0.4 0.4 0.4" );
 	color = getDvar( "hud_color" );
-	prev_color = "1 1 1";
+	prev_color = "0.4 0.4 0.4";
 
 	while( 1 )
 	{
@@ -1521,9 +1265,9 @@ color_health_bar_watcher()
 {
 	self endon("disconnect");
 
-	create_dvar( "hud_color_health", "1 1 1" );
+	create_dvar( "hud_color_health", "0.4 0.4 0.4" );
 	color = getDvar( "hud_color_health" );
-	prev_color = "1 1 1";
+	prev_color = "0.4 0.4 0.4";
 
 	while( 1 )
 	{

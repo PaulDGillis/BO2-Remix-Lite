@@ -1,12 +1,12 @@
-#include maps/mp/gametypes_zm/_hud_util;
-#include maps/mp/zombies/_zm_utility;
-#include common_scripts/utility;
-#include maps/mp/_utility;
-#include maps/mp/zombies/_zm_unitrigger;
-#include maps/mp/zombies/_zm_weap_claymore;
-#include maps/mp/zombies/_zm_melee_weapon;
-#include maps/mp/zombies/_zm_weapons;
-#include maps/mp/zombies/_zm_magicbox;
+#include maps\mp\gametypes_zm\_hud_util;
+#include maps\mp\zombies\_zm_utility;
+#include common_scripts\utility;
+#include maps\mp\_utility;
+#include maps\mp\zombies\_zm_unitrigger;
+#include maps\mp\zombies\_zm_weap_claymore;
+#include maps\mp\zombies\_zm_melee_weapon;
+#include maps\mp\zombies\_zm_weapons;
+#include maps\mp\zombies\_zm_magicbox;
 
 shared_box()
 {
@@ -39,7 +39,7 @@ reset_box()
 	if(!self.hidden)
     {
 		self.grab_weapon_hint = 0;
-		self thread maps/mp/zombies/_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
+		self thread maps\mp\zombies\_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
     	self.unitrigger_stub run_visibility_function_for_all_triggers();
 	}
 	self thread custom_treasure_chest_think();
@@ -200,7 +200,7 @@ custom_treasure_chest_think()
 			continue;
 		}
 		reduced_cost = undefined;
-		if ( is_player_valid( user ) && user maps/mp/zombies/_zm_pers_upgrades_functions::is_pers_double_points_active() )
+		if ( is_player_valid( user ) && user maps\mp\zombies\_zm_pers_upgrades_functions::is_pers_double_points_active() )
 		{
 			reduced_cost = int( self.zombie_cost / 2 );
 		}
@@ -208,13 +208,13 @@ custom_treasure_chest_think()
 		{
 			if ( user.score >= level.locked_magic_box_cost )
 			{
-				user maps/mp/zombies/_zm_score::minus_to_player_score( level.locked_magic_box_cost );
+				user maps\mp\zombies\_zm_score::minus_to_player_score( level.locked_magic_box_cost );
 				self.zbarrier set_magic_box_zbarrier_state( "unlocking" );
 				self.unitrigger_stub run_visibility_function_for_all_triggers();
 			}
 			else
 			{
-				user maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "no_money_box" );
+				user maps\mp\zombies\_zm_audio::create_and_play_dialog( "general", "no_money_box" );
 			}
 			wait 0.1 ;
 			continue;
@@ -223,7 +223,7 @@ custom_treasure_chest_think()
 		{
 			if ( !isdefined( self.no_charge ) )
 			{
-				user maps/mp/zombies/_zm_score::minus_to_player_score( self.zombie_cost );
+				user maps\mp\zombies\_zm_score::minus_to_player_score( self.zombie_cost );
 				user_cost = self.zombie_cost;
 			}
 			else
@@ -235,14 +235,14 @@ custom_treasure_chest_think()
 		}
 		else if ( is_player_valid( user ) && user.score >= self.zombie_cost )
 		{
-			user maps/mp/zombies/_zm_score::minus_to_player_score( self.zombie_cost );
+			user maps\mp\zombies\_zm_score::minus_to_player_score( self.zombie_cost );
 			user_cost = self.zombie_cost;
 			self.chest_user = user;
 			break;
 		}
 		else if ( isdefined( reduced_cost ) && user.score >= reduced_cost )
 		{
-			user maps/mp/zombies/_zm_score::minus_to_player_score( reduced_cost );
+			user maps\mp\zombies\_zm_score::minus_to_player_score( reduced_cost );
 			user_cost = reduced_cost;
 			self.chest_user = user;
 			break;
@@ -250,16 +250,16 @@ custom_treasure_chest_think()
 		else if ( user.score < self.zombie_cost )
 		{
 			play_sound_at_pos( "no_purchase", self.origin );
-			user maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "no_money_box" );
+			user maps\mp\zombies\_zm_audio::create_and_play_dialog( "general", "no_money_box" );
 			wait 0.1;
 			continue;
 		}
 		wait 0.05;
 	}
 	flag_set( "chest_has_been_used" );
-	maps/mp/_demo::bookmark( "zm_player_use_magicbox", getTime(), user );
-	user maps/mp/zombies/_zm_stats::increment_client_stat( "use_magicbox" );
-	user maps/mp/zombies/_zm_stats::increment_player_stat( "use_magicbox" );
+	maps\mp\_demo::bookmark( "zm_player_use_magicbox", getTime(), user );
+	user maps\mp\zombies\_zm_stats::increment_client_stat( "use_magicbox" );
+	user maps\mp\zombies\_zm_stats::increment_player_stat( "use_magicbox" );
 	if ( isDefined( level._magic_box_used_vo ) )
 	{
 		user thread [[ level._magic_box_used_vo ]]();
@@ -290,11 +290,11 @@ custom_treasure_chest_think()
 	self.weapon_out = 1;
 	self.zbarrier thread treasure_chest_weapon_spawn( self, user );
 	self.zbarrier thread treasure_chest_glowfx();
-	thread maps/mp/zombies/_zm_unitrigger::unregister_unitrigger( self.unitrigger_stub );
+	thread maps\mp\zombies\_zm_unitrigger::unregister_unitrigger( self.unitrigger_stub );
 	self.zbarrier waittill_any( "randomization_done", "box_hacked_respin" );
 	if ( flag( "moving_chest_now" ) && !self._box_opened_by_fire_sale && isDefined( user_cost ) )
 	{
-		user maps/mp/zombies/_zm_score::add_to_player_score( user_cost, 0 );
+		user maps\mp\zombies\_zm_score::add_to_player_score( user_cost, 0 );
 	}
 	if ( flag( "moving_chest_now" ) && !level.zombie_vars[ "zombie_powerup_fire_sale_on" ] && !self._box_opened_by_fire_sale )
 	{
@@ -305,7 +305,7 @@ custom_treasure_chest_think()
 		self.grab_weapon_hint = 1;
 		self.grab_weapon_name = self.zbarrier.weapon_string;
 		self.chest_user = user;
-		thread maps/mp/zombies/_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
+		thread maps\mp\zombies\_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
 		if ( isDefined( self.zbarrier ) && !is_true( self.zbarrier.closed_by_emp ) )
 		{
 			self thread treasure_chest_timeout();
@@ -355,7 +355,7 @@ custom_treasure_chest_think()
 		{
 			level.pulls_since_last_ray_gun += 1;
 		}
-		thread maps/mp/zombies/_zm_unitrigger::unregister_unitrigger( self.unitrigger_stub );
+		thread maps\mp\zombies\_zm_unitrigger::unregister_unitrigger( self.unitrigger_stub );
 		if ( isDefined( self.chest_lid ) )
 		{
 			self.chest_lid thread treasure_chest_lid_close( self.timedout );
@@ -373,7 +373,7 @@ custom_treasure_chest_think()
 		}
 		if ( isDefined( level.zombie_vars[ "zombie_powerup_fire_sale_on" ] ) && level.zombie_vars[ "zombie_powerup_fire_sale_on" ] || self [[ level._zombiemode_check_firesale_loc_valid_func ]]() || self == level.chests[ level.chest_index ] )
 		{
-			thread maps/mp/zombies/_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
+			thread maps\mp\zombies\_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
 		}
 	}
 	self._box_open = 0;
@@ -394,7 +394,7 @@ custom_watch_for_lock()
     self notify( "kill_chest_think" );
     self.grab_weapon_hint = 0;
     wait 0.1;
-    self thread maps/mp/zombies/_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
+    self thread maps\mp\zombies\_zm_unitrigger::register_static_unitrigger( self.unitrigger_stub, ::magicbox_unitrigger_think );
     self.unitrigger_stub run_visibility_function_for_all_triggers();
     self thread custom_treasure_chest_think();
 }
